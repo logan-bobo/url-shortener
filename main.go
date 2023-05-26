@@ -24,7 +24,7 @@ func createURLKey(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(newRedirectURL)
+	fmt.Println(newRedirectURL.URL)
 	c.IndentedJSON(http.StatusCreated, newRedirectURL)
 
 	// Generate a key based on a hash of the url and wrte to DB this means that each URl is unique in the DB and a
@@ -35,10 +35,10 @@ func main() {
 	r := gin.Default()
 
 	// Read route for urlkeys
-	r.GET("/api/v1/urlkeys", readUrlKeys)
+	r.GET("/api/v1/urlkeys", readURLKeys)
 
 	// Create route for url keys
-	r.POST("/api/v1/urlkeys", createUrlKey)
+	r.POST("/api/v1/urlkeys", createURLKey)
 
 	r.Run() // listen and serve on 0.0.0.0:8080
 

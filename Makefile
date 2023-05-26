@@ -13,5 +13,9 @@ vet: fmt
 .PHONY:vet
 
 build: vet
-		go build hello.go
+		go build main.go
 .PHONY:build
+
+run: vet
+		go run main.go
+.PHONY:run
