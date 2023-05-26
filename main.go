@@ -7,18 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type RedirectURL struct {
+type redirectURL struct {
 	URL string `json:"url"`
 }
 
-func readUrlKeys(c *gin.Context) {
+func readURLKeys(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"redirect": "https//www.google.com",
 	})
 }
 
-func createUrlKey(c *gin.Context) {
-	var newRedirectURL RedirectURL
+func createURLKey(c *gin.Context) {
+	var newRedirectURL redirectURL
 
 	if err := c.BindJSON(&newRedirectURL); err != nil {
 		return
