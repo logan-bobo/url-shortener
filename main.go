@@ -10,6 +10,17 @@ import (
 	"gorm.io/gorm"
 )
 
+var DB *gorm.DB
+
+func connectDB(connectionString string) {
+	db, err := gorm.Open(postgres.Open(connectionString), &gorm.Config{})
+	if err != nil {
+		panic(err.Error())
+	}
+
+	DB = db
+}
+
 type savedURL struct {
 	ID        string `gorm:"primaryKey"`
 	URL       string
@@ -36,6 +47,17 @@ func createURLKey(c *gin.Context) {
 		return
 	}
 
+	url := savedURL{
+		URL: newRedirectURL.URL, 
+		CreatedAt: time.Now(),
+	}
+
+	result := DB.Create(&url)
+
+	if result.Error != nil {
+		panic(result.Error)
+	}
+
 	c.JSON(201, newRedirectURL)
 
 	// Generate a key based on a hash of the url and wrte to DB this means that each URl is unique in the DB and a
@@ -59,12 +81,9 @@ func main() {
 		DB_PORT,
 	)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
+	connectDB(dsn)
 
-	err = db.AutoMigrate(&savedURL{})
+	err := DB.AutoMigrate(&savedURL{})
 
 	if err != nil {
 		return
