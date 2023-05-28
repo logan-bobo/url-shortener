@@ -17,5 +17,5 @@ build: vet
 .PHONY:build
 
 run: vet
-		go run main.go
+		docker compose up 
 .PHONY:run
