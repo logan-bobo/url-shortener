@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -30,19 +31,29 @@ type savedURL struct {
 	CreatedAt time.Time
 }
 
-// Representation of JSON expected to be used with POST request to the /api/v1/urlkeys endpont
+// Representation of JSON expected to be used with POST request to the /api/v1/urlkeys endpont {"URL": "www.example.com"}
 type redirectURL struct {
 	URL string `json:"URL"`
 }
 
-// Dummy return to front end for now at /api/v1/urlkeys on GET request
+// Read the URL to redirect to from a given key
 func readURLKeys(c *gin.Context) {
+	urlID := c.Param("id")
+
+	urlIDI32, err := strconv.ParseInt(urlID, 10, 32)
+	if err != nil {
+		panic(err)
+	}
+
+	var urlInstance = savedURL{ID: int32(urlIDI32)}
+
+	DB.First(&urlInstance)
 	c.JSON(200, gin.H{
-		"redirect": "https//www.google.com",
+		"redirect": urlInstance.URL,
 	})
 }
 
-// Cteate a key to url mapping at the database level return the key and URL
+// Create a key to url mapping at the database level return the key and URL
 func createURLKey(c *gin.Context) {
 	var newRedirectURL redirectURL
 
@@ -53,60 +64,60 @@ func createURLKey(c *gin.Context) {
 		return
 	}
 
-	url := savedURL{
+	newSavedURL := savedURL{
 		URL:       newRedirectURL.URL,
 		CreatedAt: time.Now(),
 	}
 
-	result := DB.Create(&url)
+	result := DB.Create(&newSavedURL)
 
 	if result.Error != nil {
 		panic(result.Error)
 	}
 
 	c.JSON(201, gin.H{
-		"URL": url.URL,
-		"KEY": url.ID,
+		"URL": newSavedURL.URL,
+		"KEY": newSavedURL.ID,
 	})
-
-	// Generate a key based on a hash of the url and wrte to DB this means that each URl is unique in the DB and a
-	// URL will always output the same hash
-
 }
 
 func main() {
-	DB_USER := os.Getenv("DB_USER")
-	DB_PASSWORD := os.Getenv("DB_PASSWORD")
-	DB_PORT := os.Getenv("DB_PORT")
-	DB_HOST := os.Getenv("DB_HOST")
-	DB_NAME := os.Getenv("DB_NAME")
+	// Get main db connection paramaters from host OS
+	dbHost := os.Getenv("DB_HOST")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	dbPort := os.Getenv("DB_PORT")
 
+	// Build connection string
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s",
-		DB_HOST,
-		DB_USER,
-		DB_PASSWORD,
-		DB_NAME,
-		DB_PORT,
+		dbHost,
+		dbUser,
+		dbPassword,
+		dbName,
+		dbPort,
 	)
 
+	// Connect to the database based on the connection string
 	connectDB(dsn)
 
+	// Run automatic datbaase migrations
 	err := DB.AutoMigrate(&savedURL{})
 
 	if err != nil {
 		return
 	}
 
-	// create an instance of the gin engine
+	// Create an instance of the gin engine
 	r := gin.Default()
 
 	// Read route for urlkeys
-	r.GET("/api/v1/urlkeys", readURLKeys)
+	r.GET("/api/v1/urlkeys/:id", readURLKeys)
 
 	// Create route for url keys
 	r.POST("/api/v1/urlkeys", createURLKey)
 
+	// Run the application
 	r.Run() // listen and serve on 0.0.0.0:8080
-
 }
