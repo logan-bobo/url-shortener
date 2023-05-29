@@ -27,13 +27,13 @@ func connectDB(connectionString string) {
 // Model for use with GORM
 type savedURL struct {
 	ID        int32 `gorm:"AUTO_INCREMENT;PRIMARY_KEY;not null"`
-	URL       string
+	URL       string `gorm:"not null"`
 	CreatedAt time.Time
 }
 
 // Representation of JSON expected to be used with POST request to the /api/v1/urlkeys endpont {"URL": "www.example.com"}
 type redirectURL struct {
-	URL string `json:"URL"`
+	URL string `json:"URL" binding:"required"`
 }
 
 // Read the URL to redirect to from a given key
@@ -60,12 +60,17 @@ func readURLKeys(c *gin.Context) {
 func createURLKey(c *gin.Context) {
 	var newRedirectURL redirectURL
 
+	// Request cant be bound to struct redirectURL
 	if err := c.BindJSON(&newRedirectURL); err != nil {
 		c.JSON(400, gin.H{
-			"error": "invalid request",
+			"error": "Invalid request, please ensure POST reqeusts to this endpoint match the required JSON structure",
 		})
 		return
 	}
+
+	// Check if the request JSON contains the KEY URL if not request error
+	fmt.Println(newRedirectURL)
+	// Is URL valid?
 
 	newSavedURL := savedURL{
 		URL:       newRedirectURL.URL,
