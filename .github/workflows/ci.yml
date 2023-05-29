@@ -23,4 +23,5 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.52.2
+          args: -E errcheck gofmt wsl
           
