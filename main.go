@@ -42,7 +42,10 @@ func readURLKeys(c *gin.Context) {
 
 	urlIDI32, err := strconv.ParseInt(urlID, 10, 32)
 	if err != nil {
-		panic(err)
+		c.JSON(400, gin.H{
+			"error": "Invalid request please follow the docuemnted format of /api/v1/urlkeys/1",
+		})
+		return
 	}
 
 	var urlInstance = savedURL{ID: int32(urlIDI32)}
