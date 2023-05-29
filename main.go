@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -68,9 +69,14 @@ func createURLKey(c *gin.Context) {
 		return
 	}
 
-	// Check if the request JSON contains the KEY URL if not request error
-	fmt.Println(newRedirectURL)
-	// Is URL valid?
+	// validate url is valid before we write to database
+	_, err := url.ParseRequestURI(newRedirectURL.URL)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "Invalid request, URL is invalid",
+		})
+		return
+	}
 
 	newSavedURL := savedURL{
 		URL:       newRedirectURL.URL,
