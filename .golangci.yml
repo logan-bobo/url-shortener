@@ -1,0 +1,15 @@
+# Options for analysis running.
+run:
+  timeout: 5m
+  go: '1.20'
+linters:
+  enable: 
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    - gofmt
+    - wsl

@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
-	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -27,7 +27,7 @@ func connectDB(connectionString string) {
 
 // Model for use with GORM
 type savedURL struct {
-	ID        int32 `gorm:"AUTO_INCREMENT;PRIMARY_KEY;not null"`
+	ID        int32  `gorm:"AUTO_INCREMENT;PRIMARY_KEY;not null"`
 	URL       string `gorm:"not null"`
 	CreatedAt time.Time
 }
@@ -46,6 +46,7 @@ func readURLKeys(c *gin.Context) {
 		c.JSON(400, gin.H{
 			"error": "Invalid request please follow the docuemnted format of /api/v1/urlkeys/1",
 		})
+
 		return
 	}
 
@@ -66,6 +67,7 @@ func createURLKey(c *gin.Context) {
 		c.JSON(400, gin.H{
 			"error": "Invalid request, please ensure POST reqeusts to this endpoint match the required JSON structure",
 		})
+
 		return
 	}
 
@@ -75,6 +77,7 @@ func createURLKey(c *gin.Context) {
 		c.JSON(400, gin.H{
 			"error": "Invalid request, URL is invalid",
 		})
+
 		return
 	}
 
