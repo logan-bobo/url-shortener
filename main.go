@@ -38,7 +38,7 @@ type redirectURL struct {
 }
 
 // Read the URL to redirect to from a given key
-func readURLKeys(c *gin.Context) {
+func readURLKey(c *gin.Context) {
 	urlID := c.Param("id")
 
 	urlIDI32, err := strconv.ParseInt(urlID, 10, 32)
@@ -92,9 +92,35 @@ func createURLKey(c *gin.Context) {
 		panic(result.Error)
 	}
 
-	c.JSON(201, gin.H{
+	c.JSON(200, gin.H{
 		"URL": newSavedURL.URL,
 		"KEY": newSavedURL.ID,
+	})
+}
+
+// Delete a url key pair
+func deleteURLkey(c *gin.Context) {
+	urlID := c.Param("id")
+
+	urlIDI32, err := strconv.ParseInt(urlID, 10, 32)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "Invalid request please follow the docuemnted format of /api/v1/urlkeys/1",
+		})
+
+		return
+	}
+
+	var urlInstance = savedURL{ID: int32(urlIDI32)}
+
+	result := DB.Delete(&urlInstance)
+
+	if result.Error != nil {
+		panic(result.Error)
+	}
+
+	c.JSON(200, gin.H{
+		"status": "OK",
 	})
 }
 
@@ -123,17 +149,20 @@ func main() {
 	err := DB.AutoMigrate(&savedURL{})
 
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	// Create an instance of the gin engine
 	r := gin.Default()
 
-	// Read route for urlkeys
-	r.GET("/api/v1/urlkeys/:id", readURLKeys)
+	// Read route for url keys
+	r.GET("/api/v1/urlkeys/:id", readURLKey)
 
 	// Create route for url keys
 	r.POST("/api/v1/urlkeys", createURLKey)
+
+	// Delete route for url keys
+	r.DELETE("/api/v1/urlkeys/:id", deleteURLkey)
 
 	// Run the application
 	err = r.Run() // listen and serve on 0.0.0.0:8080
