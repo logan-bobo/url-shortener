@@ -113,6 +113,15 @@ func deleteURLkey(c *gin.Context) {
 
 	var urlInstance = savedURL{ID: int32(urlIDI32)}
 
+	exists := DB.First(&urlInstance)
+	if exists.Error != nil {
+		c.JSON(400, gin.H{
+			"error": fmt.Sprintf("url does not exist with the given key %s", urlID),
+		})
+
+		return
+	}
+
 	result := DB.Delete(&urlInstance)
 
 	if result.Error != nil {
