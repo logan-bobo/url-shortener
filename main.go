@@ -36,7 +36,7 @@ func connectDB(connectionString string) (err error) {
 
 	DB = db
 
-	return 
+	return
 }
 
 // Read the URL to redirect to from a given key
@@ -46,7 +46,7 @@ func readURLKey(c *gin.Context) {
 	urlIDI32, err := strconv.ParseInt(urlID, 10, 32)
 	if err != nil {
 		c.JSON(400, gin.H{
-			"error": "Invalid request please follow the docuemnted format of /api/v1/urlkeys/1",
+			"error": "Invalid request please follow the documented format of /api/v1/urlkeys/1",
 		})
 
 		return
@@ -163,17 +163,26 @@ func updateURLKey(c *gin.Context) {
 	urlIDI32, err := strconv.ParseInt(urlID, 10, 32)
 	if err != nil {
 		c.JSON(400, gin.H{
-			"error": "Invalid request please follow the docuemnted format of /api/v1/urlkeys/1",
+			"error": "Invalid request please follow the documented format of /api/v1/urlkeys/1",
 		})
 
 		return
 	}
 
 	var urlInstance = savedURL{
-		ID: int32(urlIDI32),
-		URL: updateRedirectURL.URL,
+		ID:        int32(urlIDI32),
+		URL:       updateRedirectURL.URL,
 		CreatedAt: time.Now(),
-	 }
+	}
+
+	exists := DB.First(&urlInstance)
+	if exists.Error != nil {
+		c.JSON(400, gin.H{
+			"error": fmt.Sprintf("Given key does not exist %s", urlID),
+		})
+
+		return
+	}
 
 	result := DB.Save(&urlInstance)
 
