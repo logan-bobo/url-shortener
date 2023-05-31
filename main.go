@@ -87,6 +87,7 @@ func createURLKey(c *gin.Context) {
 	newSavedURL := savedURL{
 		URL:       newRedirectURL.URL,
 		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	result := DB.Create(&newSavedURL)
