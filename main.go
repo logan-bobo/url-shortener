@@ -17,6 +17,7 @@ type savedURL struct {
 	ID        int32  `gorm:"AUTO_INCREMENT;PRIMARY_KEY;not null"`
 	URL       string `gorm:"not null"`
 	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 // Representation of JSON expected to be used with POST request to the /api/v1/urlkeys endpont {"URL": "www.example.com"}
@@ -172,7 +173,7 @@ func updateURLKey(c *gin.Context) {
 	var urlInstance = savedURL{
 		ID:        int32(urlIDI32),
 		URL:       updateRedirectURL.URL,
-		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	exists := DB.First(&urlInstance)
