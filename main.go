@@ -55,7 +55,15 @@ func readURLKey(c *gin.Context) {
 
 	var urlInstance = savedURL{ID: int32(urlIDI32)}
 
-	DB.First(&urlInstance)
+	exists := DB.First(&urlInstance)
+	if exists.Error != nil {
+		c.JSON(400, gin.H{
+			"error": fmt.Sprintf("Given key does not exist %s", urlID),
+		})
+
+		return
+	}
+
 	c.JSON(200, gin.H{
 		"redirect": urlInstance.URL,
 	})

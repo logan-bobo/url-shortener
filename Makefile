@@ -5,7 +5,7 @@ fmt:
 .PHONY:fmt
 
 lint: fmt
-		golint ./...
+		golangci-lint run -v
 .PHONY:lint
 
 vet: fmt
@@ -13,7 +13,7 @@ vet: fmt
 .PHONY:vet
 
 build: vet
-		go build main.go
+		docker build -t url_shortener:local .
 .PHONY:build
 
 run: vet
