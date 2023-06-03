@@ -16,6 +16,6 @@ build: vet
 		docker build -t url_shortener:local .
 .PHONY:build
 
-run: vet
+run: vet build
 		docker compose up 
 .PHONY:run

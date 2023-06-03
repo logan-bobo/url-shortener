@@ -3,14 +3,15 @@ package main
 import (
 	"fmt"
 	"net/url"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
+	"github.com/logan-bobo/url_shortener/db"
 	"gorm.io/gorm"
 )
+
+var DB *gorm.DB
 
 // Model for use with GORM
 type savedURL struct {
@@ -23,21 +24,6 @@ type savedURL struct {
 // Representation of JSON expected to be used with POST request to the /api/v1/urlkeys endpont {"URL": "www.example.com"}
 type redirectURL struct {
 	URL string `json:"URL" binding:"required"`
-}
-
-// DB connection that can be used across all route functions
-var DB *gorm.DB
-
-// Instantiate a DB connection via a connection string
-func connectDB(connectionString string) (err error) {
-	db, err := gorm.Open(postgres.Open(connectionString), &gorm.Config{})
-	if err != nil {
-		return err
-	}
-
-	DB = db
-
-	return
 }
 
 // Read the URL to redirect to from a given key
@@ -207,31 +193,11 @@ func updateURLKey(c *gin.Context) {
 }
 
 func main() {
-	// Get main db connection paramaters from host OS
-	dbHost := os.Getenv("DB_HOST")
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbName := os.Getenv("DB_NAME")
-	dbPort := os.Getenv("DB_PORT")
-
-	// Build connection string
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s",
-		dbHost,
-		dbUser,
-		dbPassword,
-		dbName,
-		dbPort,
-	)
-
-	// Connect to the database based on the connection string
-	err := connectDB(dsn)
-	if err != nil {
-		panic(err)
-	}
+	db.Init()
+	DB = db.GetDB()
 
 	// Run automatic datbaase migrations
-	err = DB.AutoMigrate(&savedURL{})
+	err := DB.AutoMigrate(&savedURL{})
 	if err != nil {
 		panic(err)
 	}
