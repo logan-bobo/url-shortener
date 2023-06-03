@@ -8,18 +8,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/logan-bobo/url_shortener/db"
+	"github.com/logan-bobo/url_shortener/models"
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
-
-// Model for use with GORM
-type savedURL struct {
-	ID        int32  `gorm:"AUTO_INCREMENT;PRIMARY_KEY;not null"`
-	URL       string `gorm:"not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
 
 // Representation of JSON expected to be used with POST request to the /api/v1/urlkeys endpont {"URL": "www.example.com"}
 type redirectURL struct {
@@ -39,7 +32,7 @@ func readURLKey(c *gin.Context) {
 		return
 	}
 
-	var urlInstance = savedURL{ID: int32(urlIDI32)}
+	var urlInstance = models.SavedURL{ID: int32(urlIDI32)}
 
 	exists := DB.First(&urlInstance)
 	if exists.Error != nil {
@@ -78,7 +71,7 @@ func createURLKey(c *gin.Context) {
 		return
 	}
 
-	newSavedURL := savedURL{
+	newSavedURL := models.SavedURL{
 		URL:       newRedirectURL.URL,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -109,7 +102,7 @@ func deleteURLkey(c *gin.Context) {
 		return
 	}
 
-	var urlInstance = savedURL{ID: int32(urlIDI32)}
+	var urlInstance = models.SavedURL{ID: int32(urlIDI32)}
 
 	exists := DB.First(&urlInstance)
 	if exists.Error != nil {
@@ -165,7 +158,7 @@ func updateURLKey(c *gin.Context) {
 		return
 	}
 
-	var urlInstance = savedURL{
+	var urlInstance = models.SavedURL{
 		ID:        int32(urlIDI32),
 		URL:       updateRedirectURL.URL,
 		UpdatedAt: time.Now(),
@@ -197,7 +190,7 @@ func main() {
 	DB = db.GetDB()
 
 	// Run automatic datbaase migrations
-	err := DB.AutoMigrate(&savedURL{})
+	err := DB.AutoMigrate(&models.SavedURL{})
 	if err != nil {
 		panic(err)
 	}
