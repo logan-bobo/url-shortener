@@ -1,21 +1,9 @@
-.DEFAULT_GOAL := build
+.DEFAULT_GOAL := run
 
-fmt:
-		go fmt ./...
-.PHONY:fmt
-
-lint: fmt
-		golangci-lint run -v
-.PHONY:lint
-
-vet: fmt
-		go vet ./...
-.PHONY:vet
-
-build: vet
-		docker build -t url_shortener:local .
+build:
+		docker build -f back-end/Dockerfile -t url_shortener:local ./back-end
 .PHONY:build
 
-run: vet build
+run: build
 		docker compose up 
 .PHONY:run
