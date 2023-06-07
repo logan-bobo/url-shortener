@@ -7,24 +7,20 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/logan-bobo/url_shortener/db"
 	"github.com/logan-bobo/url_shortener/models"
 	"gorm.io/gorm"
 )
-
-var DB *gorm.DB
-
-func Init() {
-	DB = db.GetDB()
-}
 
 // Representation of JSON expected to be used with POST request to the /api/v1/urlkeys endpont {"URL": "www.example.com"}
 type RedirectURL struct {
 	URL string `json:"URL" binding:"required"`
 }
 
-// Read the URL to redirect to from a given key
-func ReadURLKey(c *gin.Context) {
+type Server struct {
+	db *gorm.DB
+}
+
+func (s Server) ReadURLKey(c *gin.Context) {
 	urlID := c.Param("id")
 
 	urlIDI32, err := strconv.ParseInt(urlID, 10, 32)
@@ -38,7 +34,7 @@ func ReadURLKey(c *gin.Context) {
 
 	var urlInstance = models.SavedURL{ID: int32(urlIDI32)}
 
-	exists := DB.First(&urlInstance)
+	exists := s.db.First(&urlInstance)
 	if exists.Error != nil {
 		c.JSON(400, gin.H{
 			"error": fmt.Sprintf("Given key does not exist %s", urlID),
@@ -52,8 +48,7 @@ func ReadURLKey(c *gin.Context) {
 	})
 }
 
-// Create a key to url mapping at the database level return the key and URL
-func CreateURLKey(c *gin.Context) {
+func (s Server) CreateURLKey(c *gin.Context) {
 	var newRedirectURL RedirectURL
 
 	// Request cant be bound to struct redirectURL
@@ -81,7 +76,7 @@ func CreateURLKey(c *gin.Context) {
 		UpdatedAt: time.Now(),
 	}
 
-	result := DB.Create(&newSavedURL)
+	result := s.db.Create(&newSavedURL)
 
 	if result.Error != nil {
 		panic(result.Error)
@@ -93,8 +88,7 @@ func CreateURLKey(c *gin.Context) {
 	})
 }
 
-// Delete a url key pair
-func DeleteURLkey(c *gin.Context) {
+func (s Server) DeleteURLkey(c *gin.Context) {
 	urlID := c.Param("id")
 
 	urlIDI32, err := strconv.ParseInt(urlID, 10, 32)
@@ -108,7 +102,7 @@ func DeleteURLkey(c *gin.Context) {
 
 	var urlInstance = models.SavedURL{ID: int32(urlIDI32)}
 
-	exists := DB.First(&urlInstance)
+	exists := s.db.First(&urlInstance)
 	if exists.Error != nil {
 		c.JSON(400, gin.H{
 			"error": fmt.Sprintf("url does not exist with the given key %s", urlID),
@@ -117,7 +111,7 @@ func DeleteURLkey(c *gin.Context) {
 		return
 	}
 
-	result := DB.Delete(&urlInstance)
+	result := s.db.Delete(&urlInstance)
 
 	if result.Error != nil {
 		panic(result.Error)
@@ -128,11 +122,9 @@ func DeleteURLkey(c *gin.Context) {
 	})
 }
 
-// Update a url that exists at a given key
-func UpdateURLKey(c *gin.Context) {
+func (s Server) UpdateURLKey(c *gin.Context) {
 	var updateRedirectURL RedirectURL
 
-	// Request cant be bound to struct redirectURL
 	if err := c.BindJSON(&updateRedirectURL); err != nil {
 		c.JSON(400, gin.H{
 			"error": "Invalid request, please ensure PUT reqeusts to this endpoint match the required JSON structure",
@@ -141,7 +133,6 @@ func UpdateURLKey(c *gin.Context) {
 		return
 	}
 
-	// validate url is valid before we write to database
 	_, err := url.ParseRequestURI(updateRedirectURL.URL)
 	if err != nil {
 		c.JSON(400, gin.H{
@@ -168,7 +159,7 @@ func UpdateURLKey(c *gin.Context) {
 		UpdatedAt: time.Now(),
 	}
 
-	exists := DB.First(&urlInstance)
+	exists := s.db.First(&urlInstance)
 	if exists.Error != nil {
 		c.JSON(400, gin.H{
 			"error": fmt.Sprintf("Given key does not exist %s", urlID),
@@ -177,7 +168,7 @@ func UpdateURLKey(c *gin.Context) {
 		return
 	}
 
-	result := DB.Save(&urlInstance)
+	result := s.db.Save(&urlInstance)
 
 	if result.Error != nil {
 		panic(result.Error)
@@ -187,4 +178,10 @@ func UpdateURLKey(c *gin.Context) {
 		"KEY": urlInstance.ID,
 		"URL": urlInstance.URL,
 	})
+}
+
+func NewBaseHandler(db *gorm.DB) *Server {
+	return &Server{
+		db: db,
+	}
 }

@@ -1,25 +1,55 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/logan-bobo/url_shortener/controllers"
 	"github.com/logan-bobo/url_shortener/db"
 	"github.com/logan-bobo/url_shortener/models"
 	"github.com/logan-bobo/url_shortener/server"
-	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
+type DBconfig struct {
+	Host     string
+	User     string
+	Password string
+	Name     string
+	Port     string
+}
 
 func main() {
-	db.Init()
+	dbHost := os.Getenv("DB_HOST")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	dbPort := os.Getenv("DB_PORT")
 
-	DB = db.GetDB()
+	dbConfig := &DBconfig{
+		Host:     dbHost,
+		User:     dbUser,
+		Password: dbPassword,
+		Name:     dbName,
+		Port:     dbPort,
+	}
 
-	// Run automatic datbaase migrations
-	err := DB.AutoMigrate(&models.SavedURL{})
+	connectionString := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s",
+		dbConfig.Host,
+		dbConfig.User,
+		dbConfig.Password,
+		dbConfig.Name,
+		dbConfig.Port,
+	)
+
+	con := db.ConnectDB(connectionString)
+
+	err := con.AutoMigrate(&models.SavedURL{})
 	if err != nil {
 		panic(err)
 	}
 
-	// Run the application
-	server.Init()
+	bh := controllers.NewBaseHandler(con)
+
+	server.StartServer(bh)
 }

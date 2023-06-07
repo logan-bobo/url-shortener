@@ -31,7 +31,7 @@ based on user actions.
 
 ## Frontend Server
 The front end will be a [NGINX](https://docs.nginx.com/nginx/admin-guide/web-server/web-server/) webserver 
-serving static HTML, CSS and Javascript using the [React](https://react.dev/) library.
+serving static HTML, CSS and Javascript. The frontend will be build using Typescript and the [React](https://react.dev/) library.
 
 ## Scenarios
 ### Creating a link
