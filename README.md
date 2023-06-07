@@ -8,9 +8,10 @@ This service provides the capability to use the unique key to access the origina
 - **URL Compression**: The application accepts a standard URL and generates a unique key representing the corresponding URL.
 - **Link Redirection**: The users are equipped with the convenience of accessing the original website via the unique key provided to them.
 - **CRUD Operations**: The users can manage their links through the creation, reading, updating, and deletion of a link.
+- **No Auth**: A users links are based on a session token, this keeps the service simple
 
 ## System description
-The system is primarily composed of three core components:
+The system is composed of three components:
 
 1. **Front End Server**: Provides the client with HTML, JavaScript, and CSS.
 2. **Back End Server**: Serves as a REST API for administering shortened links.
