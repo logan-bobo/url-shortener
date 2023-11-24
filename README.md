@@ -1,4 +1,4 @@
-# 🔗 URL Shortener 🔗
+# URL Shortener
 
 ## Overview
 The URL Shortener is a URL shortening application designed to convert longer URLs into concise, unique keys. 
