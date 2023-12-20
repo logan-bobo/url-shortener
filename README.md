@@ -35,6 +35,7 @@ The front end will be a [NGINX](https://docs.nginx.com/nginx/admin-guide/web-ser
 serving static HTML, CSS and Javascript. The frontend will be build using Typescript and the [React](https://react.dev/) library.
 
 ## Scenarios
+
 ### Creating a link
 
 ### Read a link
@@ -42,33 +43,3 @@ serving static HTML, CSS and Javascript. The frontend will be build using Typesc
 ### Update a link 
 
 ### Delete a link
-
-
-## Scalability
-
-
-## Reliability
-
-
-## Security
-
-
-## Continious Integration
-
-
-## Continious Deployment
-
-
-## Release Stratergy
-
-
-## Troubleshooting
-
-
-## Monitoring
-
-
-## Troubleshooting
-
-
-## Development
